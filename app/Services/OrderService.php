@@ -54,7 +54,7 @@ class OrderService
             $this->inventory->reserve($order->warehouse_id, $quantities->all(), $order, $actor);
 
             return $order;
-        });
+        }, InventoryService::DEADLOCK_ATTEMPTS);
     }
 
     public function cancel(Order $order, User $actor, string $reason): Order
@@ -71,7 +71,7 @@ class OrderService
             ]);
 
             return $order;
-        });
+        }, InventoryService::DEADLOCK_ATTEMPTS);
     }
 
     public function ship(Order $order, User $actor, string $trackingNumber): Order
@@ -91,7 +91,7 @@ class OrderService
             OrderShipped::dispatch($order);
 
             return $order;
-        });
+        }, InventoryService::DEADLOCK_ATTEMPTS);
     }
 
     /**
