@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthTokenController;
+use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\WarehouseController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('v1.')->group(function () {
@@ -14,5 +17,11 @@ Route::prefix('v1')->name('v1.')->group(function () {
         Route::get('auth/me', [AuthTokenController::class, 'me'])->name('auth.me');
 
         Route::apiResource('users', UserController::class)->except('destroy');
+
+        // Catalogue records are referenced by stock and orders, so they are
+        // deactivated rather than deleted.
+        Route::apiResource('warehouses', WarehouseController::class)->except('destroy');
+        Route::apiResource('products', ProductController::class)->except('destroy');
+        Route::apiResource('customers', CustomerController::class)->except('destroy');
     });
 });
