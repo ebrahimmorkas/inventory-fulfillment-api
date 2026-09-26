@@ -33,7 +33,12 @@ class AuthTokenController extends Controller
             ]);
         }
 
-        $token = $user->createToken($request->validated('device_name'));
+        // Sanctum enforces sanctum.expiration at request time but does not store it;
+        // storing expires_at lets clients see it and sanctum:prune-expired remove it.
+        $token = $user->createToken(
+            $request->validated('device_name'),
+            expiresAt: now()->addMinutes((int) config('sanctum.expiration')),
+        );
 
         return response()->json([
             'token' => $token->plainTextToken,
