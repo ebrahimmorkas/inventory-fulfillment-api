@@ -54,5 +54,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip());
         });
+
+        // Each export is an expensive background job; cap how many a user can queue.
+        RateLimiter::for('report-exports', function (Request $request) {
+            return Limit::perHour(10)->by($request->user()->id);
+        });
     }
 }

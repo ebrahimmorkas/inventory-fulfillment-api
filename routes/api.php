@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\Reports\InventoryValuationController;
+use App\Http\Controllers\Api\V1\Reports\SalesExportController;
 use App\Http\Controllers\Api\V1\StockLevelController;
 use App\Http\Controllers\Api\V1\StockMovementController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -45,5 +47,15 @@ Route::prefix('v1')->name('v1.')->group(function () {
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('orders/{order}/ship', [OrderController::class, 'ship'])->name('orders.ship');
+
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('inventory-valuation', InventoryValuationController::class)->name('inventory-valuation');
+            Route::get('sales-exports', [SalesExportController::class, 'index'])->name('sales-exports.index');
+            Route::post('sales-exports', [SalesExportController::class, 'store'])
+                ->middleware('throttle:report-exports')
+                ->name('sales-exports.store');
+            Route::get('sales-exports/{export}', [SalesExportController::class, 'show'])->name('sales-exports.show');
+            Route::get('sales-exports/{export}/download', [SalesExportController::class, 'download'])->name('sales-exports.download');
+        });
     });
 });
