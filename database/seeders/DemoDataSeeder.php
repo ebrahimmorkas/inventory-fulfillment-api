@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Enums\Role;
+use App\Events\OrderShipped;
+use App\Events\StockLevelChanged;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\StockLevel;
@@ -24,6 +26,9 @@ use RuntimeException;
  */
 class DemoDataSeeder extends Seeder
 {
+    /** Only these events are faked; Eloquent model events must still fire. */
+    private const FAKED_EVENTS = [StockLevelChanged::class, OrderShipped::class];
+
     public function run(InventoryService $inventory, OrderService $orders): void
     {
         if (app()->isProduction()) {
@@ -47,7 +52,7 @@ class DemoDataSeeder extends Seeder
         $products = Product::factory()->count(40)->create();
         $customers = Customer::factory()->count(25)->create();
 
-        // Avoid sending low-stock mail while seeding.
+        // Suppress low-stock and shipment mail while seeding.
         Event::fakeFor(function () use ($warehouses, $products, $inventory, $managers) {
             foreach ($warehouses as $i => $warehouse) {
                 foreach ($products->random(30) as $product) {
@@ -56,7 +61,7 @@ class DemoDataSeeder extends Seeder
                         ->update(['reorder_point' => Arr::random([0, 15, 30])]);
                 }
             }
-        });
+        }, self::FAKED_EVENTS);
 
         Event::fakeFor(function () use ($warehouses, $customers, $orders, $sales, $managers, $admin) {
             foreach (range(1, 60) as $n) {
@@ -92,7 +97,7 @@ class DemoDataSeeder extends Seeder
                     default => null,
                 };
             }
-        });
+        }, self::FAKED_EVENTS);
 
         $this->command?->info('Demo users: admin@example.com, sales@example.com, '.$managers->pluck('email')->implode(', '));
         if (! config('app.demo_user_password')) {

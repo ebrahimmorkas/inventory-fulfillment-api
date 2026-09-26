@@ -15,6 +15,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class OrderFactory extends Factory
 {
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Order $order) {
+            $order->number ??= Order::numberFor($order->id);
+            $order->save();
+        });
+    }
+
     public function definition(): array
     {
         return [

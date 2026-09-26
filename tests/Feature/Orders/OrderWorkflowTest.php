@@ -11,6 +11,7 @@ use App\Models\Warehouse;
 use App\Notifications\OrderShippedNotification;
 use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -78,6 +79,16 @@ class OrderWorkflowTest extends TestCase
 
         $this->assertSame(10, StockLevel::where('product_id', $bolts->id)->value('reserved'));
         $this->assertSame(20, StockLevel::where('product_id', $nuts->id)->value('reserved'));
+    }
+
+    public function test_order_number_is_assigned_even_when_model_events_are_faked(): void
+    {
+        // Regression: numbers used to be set in a model event, which Event::fake() suppresses.
+        $product = $this->stocked(10);
+
+        $order = Event::fakeFor(fn () => $this->placeOrder([['product_id' => $product->id, 'quantity' => 1]]));
+
+        $this->assertSame(Order::numberFor($order->id), $order->fresh()->number);
     }
 
     public function test_order_is_rejected_and_nothing_persists_when_stock_is_short(): void

@@ -47,11 +47,13 @@ class SchemaIntegrityTest extends TestCase
         Product::whereKey($level->product_id)->delete();
     }
 
-    public function test_orders_receive_a_sequential_number_after_insert(): void
+    public function test_order_numbers_are_unique(): void
     {
         $order = Order::factory()->create();
 
-        $this->assertSame(sprintf('SO-%07d', $order->id), $order->fresh()->number);
+        $this->expectException(QueryException::class);
+
+        Order::factory()->create(['number' => $order->number]);
     }
 
     public function test_available_quantity_and_reorder_check(): void
