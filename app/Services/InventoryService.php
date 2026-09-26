@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\StockMovementType;
+use App\Events\StockLevelChanged;
 use App\Exceptions\InsufficientStockException;
 use App\Models\StockLevel;
 use App\Models\StockMovement;
@@ -178,6 +179,9 @@ class InventoryService
         $level->on_hand += $onHandDelta;
         $level->reserved += $reservedDelta;
         $level->save();
+
+        // Held until the outermost transaction commits; discarded on rollback.
+        StockLevelChanged::dispatch($level->warehouse_id, $level->product_id);
 
         return StockMovement::create([
             'warehouse_id' => $level->warehouse_id,
