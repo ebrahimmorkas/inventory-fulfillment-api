@@ -75,9 +75,11 @@ class ConcurrentReservationTest extends TestCase
             }
         })->start()->wait();
 
-        $outcomes = collect($results)->map(fn ($result) => trim($result->output()))->countBy()->all();
+        $outcomes = collect($results)->map(fn ($result) => trim($result->output()))->countBy();
 
-        $this->assertSame(['reserved' => 3, 'insufficient' => 3], $outcomes + ['reserved' => 0, 'insufficient' => 0]);
+        // Key order depends on which process finishes first, so compare counts individually.
+        $this->assertSame(3, $outcomes->get('reserved', 0));
+        $this->assertSame(3, $outcomes->get('insufficient', 0));
         $this->assertSame(9, $level->fresh()->reserved);
         $this->assertSame(3, DB::table('stock_movements')->where('type', 'reservation')->count());
     }
