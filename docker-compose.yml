@@ -34,6 +34,12 @@ services:
     command: php artisan queue:work redis --queue=default,reports --tries=3 --backoff=10 --max-time=3600
     restart: unless-stopped
 
+  # Drains jobs that were written to the database queue while Redis was unavailable.
+  queue-fallback:
+    <<: *app
+    command: php artisan queue:work database --queue=default,reports --tries=3 --backoff=10 --sleep=10 --max-time=3600
+    restart: unless-stopped
+
   scheduler:
     <<: *app
     command: php artisan schedule:work
