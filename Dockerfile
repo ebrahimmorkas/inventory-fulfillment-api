@@ -11,8 +11,19 @@ RUN apt-get update \
 WORKDIR /var/www/html
 
 # Development: source is bind-mounted, vendor lives in a named volume.
+# PHP-FPM, queue workers, the scheduler and artisan all run as www-data so that
+# files written by one process (logs, exports) are readable by the others.
+# UID/GID can be matched to the host user on Linux to keep bind mounts writable.
 FROM base AS development
+ARG UID=1000
+ARG GID=1000
+RUN groupmod -o -g ${GID} www-data \
+    && usermod -o -u ${UID} -g ${GID} www-data \
+    && mkdir -p /var/www/html/vendor /tmp/composer \
+    && chown www-data:www-data /var/www/html/vendor /tmp/composer
+ENV COMPOSER_HOME=/tmp/composer
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/zz-app.ini
+USER www-data
 
 # Production: immutable image with optimized autoloader and OPcache.
 FROM base AS production

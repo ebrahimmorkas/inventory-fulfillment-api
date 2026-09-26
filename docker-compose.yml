@@ -2,6 +2,9 @@ x-app: &app
   build:
     context: .
     target: development
+    args:
+      UID: ${UID:-1000}
+      GID: ${GID:-1000}
   image: inventory-fulfillment-api:dev
   volumes:
     - .:/var/www/html
