@@ -30,6 +30,23 @@ class TokenAuthenticationTest extends TestCase
         $this->assertSame(1, $user->tokens()->count());
     }
 
+    public function test_issued_tokens_expire_after_the_configured_lifetime(): void
+    {
+        config(['sanctum.expiration' => 60]);
+        User::factory()->create(['email' => 'manager@example.com']);
+
+        $response = $this->postJson('/api/v1/auth/tokens', [
+            'email' => 'manager@example.com',
+            'password' => 'password',
+            'device_name' => 'cli',
+        ]);
+
+        $this->assertEqualsWithDelta(now()->addHour()->timestamp, strtotime($response->json('expires_at')), 5);
+
+        $this->travel(61)->minutes();
+        $this->withToken($response->json('token'))->getJson('/api/v1/auth/me')->assertUnauthorized();
+    }
+
     public function test_token_can_be_used_to_access_protected_endpoints(): void
     {
         User::factory()->create(['email' => 'manager@example.com']);
