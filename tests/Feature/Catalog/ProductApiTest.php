@@ -63,7 +63,7 @@ class ProductApiTest extends TestCase
         $this->actingAsRole(Role::Sales);
         Product::factory()->create(['sku' => 'CABLE-001', 'name' => 'Ethernet cable 2m', 'unit_price_cents' => 500]);
         Product::factory()->create(['sku' => 'CABLE-002', 'name' => 'Ethernet cable 5m', 'unit_price_cents' => 900]);
-        Product::factory()->inactive()->create(['sku' => 'CABLE-003', 'name' => 'Ethernet cable 10m']);
+        Product::factory()->inactive()->create(['sku' => 'CABLE-003', 'name' => 'Ethernet cable 10m', 'unit_price_cents' => 1500]);
         Product::factory()->create(['sku' => 'MOUSE-001', 'name' => 'Wireless mouse']);
 
         $this->getJson('/api/v1/products?search=cable&is_active=1&sort=-unit_price_cents&per_page=1')
