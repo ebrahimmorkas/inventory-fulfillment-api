@@ -298,7 +298,7 @@ docker compose exec app php artisan test
 docker compose exec app vendor/bin/pint --test
 ```
 
-104 tests run against a dedicated MySQL `testing` database (created by
+105 tests run against a dedicated MySQL `testing` database (created by
 `docker/mysql/create-testing-database.sql`), because the behaviour under test
 — row locks, the CHECK constraint, foreign keys — is MySQL-specific.
 
