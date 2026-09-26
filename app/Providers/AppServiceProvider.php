@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Surface N+1 queries and silently discarded attributes during development and tests.
         Model::shouldBeStrict(! $this->app->isProduction());
+
+        Password::defaults(fn () => Password::min(12)->letters()->numbers());
 
         $this->configureRateLimiting();
     }

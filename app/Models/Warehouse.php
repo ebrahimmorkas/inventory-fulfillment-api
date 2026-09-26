@@ -25,7 +25,7 @@ class Warehouse extends Model
     /** Staff assigned to work in this warehouse. */
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class, 'warehouse_user');
     }
 
     public function stockLevels(): HasMany
