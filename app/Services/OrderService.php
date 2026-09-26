@@ -48,6 +48,7 @@ class OrderService
                 'ship_to_country' => $data['ship_to']['country'],
                 'notes' => $data['notes'] ?? null,
             ]);
+            $order->forceFill(['number' => Order::numberFor($order->id)])->save();
             $order->items()->createMany($lines->all());
 
             // Throws InsufficientStockException, rolling back the order as well.

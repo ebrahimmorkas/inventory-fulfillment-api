@@ -20,14 +20,13 @@ class Order extends Model
     /** @use HasFactory<OrderFactory> */
     use HasFactory;
 
-    protected static function booted(): void
+    /**
+     * Human-facing order number derived from the auto-increment id. It is
+     * assigned by OrderService right after insert, in the same transaction.
+     */
+    public static function numberFor(int $id): string
     {
-        // The order number is derived from the auto-increment id, so it is assigned
-        // right after insert (inside the same transaction as the order itself).
-        static::created(function (Order $order): void {
-            $order->number ??= sprintf('SO-%07d', $order->id);
-            $order->saveQuietly();
-        });
+        return sprintf('SO-%07d', $id);
     }
 
     protected function casts(): array
