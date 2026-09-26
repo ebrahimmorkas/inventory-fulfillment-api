@@ -21,9 +21,15 @@ use LogicException;
  * with SELECT ... FOR UPDATE and records one ledger entry per row changed.
  * Rows are always locked in ascending product_id order so that two concurrent
  * multi-line operations cannot deadlock by acquiring locks in opposite order.
+ *
+ * InnoDB can still report a deadlock (e.g. gap locks taken while inserting a new
+ * stock level), so the outermost transactions are retried a few times. Laravel
+ * only retries at the outermost level, so nested calls stay correct.
  */
 class InventoryService
 {
+    public const DEADLOCK_ATTEMPTS = 3;
+
     public function receive(int $warehouseId, int $productId, int $quantity, ?User $user, ?string $reason = null): StockMovement
     {
         $this->assertPositive($quantity);
@@ -32,7 +38,7 @@ class InventoryService
             $level = $this->lockOrCreateLevel($warehouseId, $productId);
 
             return $this->apply($level, StockMovementType::Receipt, $quantity, 0, $user, $reason);
-        });
+        }, self::DEADLOCK_ATTEMPTS);
     }
 
     /**
@@ -53,7 +59,7 @@ class InventoryService
             }
 
             return $this->apply($level, StockMovementType::Adjustment, $delta, 0, $user, $reason);
-        });
+        }, self::DEADLOCK_ATTEMPTS);
     }
 
     /**

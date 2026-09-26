@@ -69,9 +69,4 @@ class User extends Authenticatable
     {
         return $this->assignedWarehouseIds ??= $this->warehouses()->pluck('warehouses.id')->all();
     }
-
-    public function flushWarehouseAccessCache(): void
-    {
-        $this->assignedWarehouseIds = null;
-    }
 }

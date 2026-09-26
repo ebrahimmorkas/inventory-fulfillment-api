@@ -30,7 +30,7 @@ class DemoDataSeeder extends Seeder
             throw new RuntimeException('Demo data must not be seeded in production.');
         }
 
-        $password = env('DEMO_USER_PASSWORD') ?: Str::password(16, symbols: false);
+        $password = config('app.demo_user_password') ?: Str::password(16, symbols: false);
 
         $warehouses = collect([
             ['code' => 'LON-01', 'name' => 'London Distribution Centre', 'city' => 'London', 'country_code' => 'GB'],
@@ -95,7 +95,7 @@ class DemoDataSeeder extends Seeder
         });
 
         $this->command?->info('Demo users: admin@example.com, sales@example.com, '.$managers->pluck('email')->implode(', '));
-        if (! env('DEMO_USER_PASSWORD')) {
+        if (! config('app.demo_user_password')) {
             $this->command?->warn("Generated demo password: {$password}");
         }
     }
