@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\WarehouseFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,6 +15,10 @@ class Warehouse extends Model
 {
     /** @use HasFactory<WarehouseFactory> */
     use HasFactory;
+
+    protected $attributes = [
+        'is_active' => true,
+    ];
 
     protected function casts(): array
     {
@@ -26,6 +31,13 @@ class Warehouse extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'warehouse_user');
+    }
+
+    public function scopeAccessibleBy(Builder $query, User $user): void
+    {
+        if (! $user->hasAccessToAllWarehouses()) {
+            $query->whereIn('warehouses.id', $user->assignedWarehouseIds());
+        }
     }
 
     public function stockLevels(): HasMany
