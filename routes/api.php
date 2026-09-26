@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthTokenController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\StockLevelController;
 use App\Http\Controllers\Api\V1\StockMovementController;
@@ -34,5 +35,11 @@ Route::prefix('v1')->name('v1.')->group(function () {
             Route::post('stock-adjustments', [StockMovementController::class, 'adjust'])->name('stock-adjustments.store');
         });
         Route::get('products/{product}/stock', [StockLevelController::class, 'forProduct'])->name('products.stock');
+
+        Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::post('orders', [OrderController::class, 'store'])->middleware('idempotent')->name('orders.store');
+        Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('orders/{order}/ship', [OrderController::class, 'ship'])->name('orders.ship');
     });
 });
