@@ -28,4 +28,15 @@ class WarehousePolicy
     {
         return $user->can(Permission::CatalogManage->value);
     }
+
+    public function viewStock(User $user, Warehouse $warehouse): bool
+    {
+        return $user->can(Permission::InventoryView->value) && $user->canAccessWarehouse($warehouse);
+    }
+
+    /** Receipts, adjustments and reorder points. */
+    public function manageStock(User $user, Warehouse $warehouse): bool
+    {
+        return $user->can(Permission::InventoryAdjust->value) && $user->canAccessWarehouse($warehouse);
+    }
 }

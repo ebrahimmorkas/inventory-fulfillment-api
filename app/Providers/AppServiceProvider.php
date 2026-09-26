@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -26,6 +29,13 @@ class AppServiceProvider extends ServiceProvider
     {
         // Surface N+1 queries and silently discarded attributes during development and tests.
         Model::shouldBeStrict(! $this->app->isProduction());
+
+        // Store short aliases instead of PHP class names in polymorphic columns,
+        // so renaming a class never breaks existing rows.
+        Relation::enforceMorphMap([
+            'order' => Order::class,
+            'user' => User::class,
+        ]);
 
         Password::defaults(fn () => Password::min(12)->letters()->numbers());
 
